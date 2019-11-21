@@ -1,0 +1,334 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC"
+             xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" xmlns:bproc="http://schemas.haulmont.com/bproc/bpmn"
+             xmlns:flowable="http://flowable.org/bpmn"
+             targetNamespace="http://www.flowable.org/processdef">
+  <collaboration id="Collaboration_158pn0r">
+    <participant id="Participant_1a5mh67" processRef="new-visit" />
+  </collaboration>
+  <process id="new-visit" name="New visit" isExecutable="true">
+    <laneSet id="LaneSet_1avs6j7">
+      <lane id="Lane_0s9j6kn" name="Administrator">
+        <extensionElements>
+          <bproc:assignmentDetails assigneeSource="processVariable" assigneeValue="administrator" assignee="${administrator.id}" candidateUsersSource="users" candidateGroupsSource="userGroups" />
+        </extensionElements>
+        <flowNodeRef>startEvent1</flowNodeRef>
+        <flowNodeRef>IntermediateThrowEvent_0tx81wt</flowNodeRef>
+        <flowNodeRef>Task_1isi203</flowNodeRef>
+        <flowNodeRef>ExclusiveGateway_1ng3dkm</flowNodeRef>
+        <flowNodeRef>Task_0x4peh7</flowNodeRef>
+        <flowNodeRef>EndEvent_1cltzya</flowNodeRef>
+      </lane>
+      <lane id="Lane_1fky1f0" name="Chief doctor">
+        <extensionElements>
+          <bproc:assignmentDetails assigneeSource="userProvider" assigneeValue="petclinic_ChiefDoctorUserProvider" assignee="${petclinic_ChiefDoctorUserProvider.getForProcess(execution)}" candidateUsersSource="users" candidateGroupsSource="userGroups" />
+        </extensionElements>
+        <flowNodeRef>Task_1ue251k</flowNodeRef>
+      </lane>
+      <lane id="Lane_0xfmytg" name="Doctor">
+        <extensionElements>
+          <bproc:assignmentDetails assigneeSource="processVariable" assigneeValue="doctor" assignee="${doctor.id}" candidateUsersSource="users" candidateGroupsSource="userGroups" />
+        </extensionElements>
+        <flowNodeRef>Task_0kj19wp</flowNodeRef>
+        <flowNodeRef>ExclusiveGateway_0loj62c</flowNodeRef>
+        <flowNodeRef>EndEvent_10bzcw0</flowNodeRef>
+        <flowNodeRef>EndEvent_05x8g75</flowNodeRef>
+        <flowNodeRef>Task_132bd40</flowNodeRef>
+        <flowNodeRef>BoundaryEvent_1jw0251</flowNodeRef>
+        <flowNodeRef>Task_02cawfw</flowNodeRef>
+      </lane>
+    </laneSet>
+    <sequenceFlow id="SequenceFlow_144bj8o" sourceRef="startEvent1" targetRef="IntermediateThrowEvent_0tx81wt" />
+    <startEvent id="startEvent1">
+      <extensionElements>
+        <bproc:formData type="no-form" />
+        <bproc:processVariables>
+          <bproc:processVariable name="visit" type="entity" />
+          <bproc:processVariable name="administrator" type="user" />
+        </bproc:processVariables>
+      </extensionElements>
+      <outgoing>SequenceFlow_144bj8o</outgoing>
+    </startEvent>
+    <intermediateCatchEvent id="IntermediateThrowEvent_0tx81wt" name="1 day before the visit">
+      <incoming>SequenceFlow_144bj8o</incoming>
+      <outgoing>SequenceFlow_11leha8</outgoing>
+      <timerEventDefinition>
+        <timeDate xsi:type="tFormalExpression">${confirmVisitDate}</timeDate>
+      </timerEventDefinition>
+    </intermediateCatchEvent>
+    <sequenceFlow id="SequenceFlow_11leha8" sourceRef="IntermediateThrowEvent_0tx81wt" targetRef="Task_1isi203" />
+    <userTask id="Task_1isi203" name="Confirm the visit">
+      <extensionElements>
+        <bproc:formData type="input-dialog" openMode="DIALOG">
+          <bproc:formFields>
+            <bproc:formField id="visit" caption="Visit" type="entity" editable="false" required="false">
+              <bproc:formFieldProperty name="uiComponent" value="pickerField" />
+              <bproc:formFieldProperty name="entityName" value="petclinic_Visit" />
+            </bproc:formField>
+            <bproc:formField id="ownersComment" caption="Owner&#39;s comment" type="multilineString" editable="true" required="false" />
+          </bproc:formFields>
+          <bproc:formOutcomes>
+            <bproc:formOutcome id="confirm" caption="Confirm" icon="font-icon:CHECK" />
+            <bproc:formOutcome id="cancel" caption="Cancel" icon="font-icon:BAN" />
+          </bproc:formOutcomes>
+        </bproc:formData>
+      </extensionElements>
+      <incoming>SequenceFlow_11leha8</incoming>
+      <outgoing>SequenceFlow_1c3hhdl</outgoing>
+    </userTask>
+    <exclusiveGateway id="ExclusiveGateway_1ng3dkm">
+      <incoming>SequenceFlow_1c3hhdl</incoming>
+      <outgoing>SequenceFlow_0kurbcp</outgoing>
+      <outgoing>SequenceFlow_0e4xc8e</outgoing>
+    </exclusiveGateway>
+    <sequenceFlow id="SequenceFlow_1c3hhdl" sourceRef="Task_1isi203" targetRef="ExclusiveGateway_1ng3dkm" />
+    <sequenceFlow id="SequenceFlow_0kurbcp" name="Canceled" sourceRef="ExclusiveGateway_1ng3dkm" targetRef="Task_0x4peh7">
+      <extensionElements>
+        <bproc:conditionDetails conditionSource="userTaskOutcome" conditionType="anyoneCompleted" userTaskId="Task_1isi203" userTaskOutcome="cancel" />
+      </extensionElements>
+      <conditionExpression xsi:type="tFormalExpression">${execution.getVariable('Task_1isi203_result') != null &amp;&amp; bproc_UserTaskResults.containsOutcome(execution.getVariable('Task_1isi203_result'), 'cancel')}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="SequenceFlow_0e4xc8e" name="Confirmed" sourceRef="ExclusiveGateway_1ng3dkm" targetRef="Task_1ue251k">
+      <extensionElements>
+        <bproc:conditionDetails conditionSource="userTaskOutcome" conditionType="anyoneCompleted" userTaskId="Task_1isi203" userTaskOutcome="confirm" />
+      </extensionElements>
+      <conditionExpression xsi:type="tFormalExpression">${execution.getVariable('Task_1isi203_result') != null &amp;&amp; bproc_UserTaskResults.containsOutcome(execution.getVariable('Task_1isi203_result'), 'confirm')}</conditionExpression>
+    </sequenceFlow>
+    <userTask id="Task_1ue251k" name="Select a doctor">
+      <extensionElements>
+        <bproc:formData type="input-dialog" openMode="DIALOG">
+          <bproc:formFields>
+            <bproc:formField id="visit" caption="Visit" type="entity" editable="false" required="false">
+              <bproc:formFieldProperty name="uiComponent" value="pickerField" />
+              <bproc:formFieldProperty name="entityName" value="petclinic_Visit" />
+            </bproc:formField>
+            <bproc:formField id="ownersComment" caption="Owner&#39;s comment" type="multilineString" editable="false" required="false" />
+            <bproc:formField id="doctor" caption="Doctor" type="user" editable="true" required="true">
+              <bproc:formFieldProperty name="uiComponent" value="lookupField" />
+              <bproc:formFieldProperty name="query" value="select u from sec$User u join u.userRoles ur where ur.role.name = &#39;Doctor&#39;" />
+            </bproc:formField>
+          </bproc:formFields>
+        </bproc:formData>
+      </extensionElements>
+      <incoming>SequenceFlow_0e4xc8e</incoming>
+      <outgoing>SequenceFlow_07w22vu</outgoing>
+    </userTask>
+    <sequenceFlow id="SequenceFlow_07w22vu" sourceRef="Task_1ue251k" targetRef="Task_0kj19wp" />
+    <userTask id="Task_0kj19wp" name="Visit">
+      <extensionElements>
+        <bproc:formData type="cuba-screen" openMode="DIALOG" screenId="petclinic_VisitProcessForm">
+          <bproc:formOutcomes>
+            <bproc:formOutcome id="completed" />
+            <bproc:formOutcome id="patientDidNotCome" />
+          </bproc:formOutcomes>
+        </bproc:formData>
+      </extensionElements>
+      <incoming>SequenceFlow_07w22vu</incoming>
+      <outgoing>SequenceFlow_1j3p89u</outgoing>
+    </userTask>
+    <sequenceFlow id="SequenceFlow_0qy9di0" sourceRef="Task_0x4peh7" targetRef="EndEvent_1cltzya" />
+    <sequenceFlow id="SequenceFlow_1j3p89u" sourceRef="Task_0kj19wp" targetRef="ExclusiveGateway_0loj62c" />
+    <sequenceFlow id="SequenceFlow_1c2y47o" name="Visit completed" sourceRef="ExclusiveGateway_0loj62c" targetRef="Task_02cawfw">
+      <extensionElements>
+        <bproc:conditionDetails conditionSource="userTaskOutcome" conditionType="anyoneCompleted" userTaskId="Task_0kj19wp" userTaskOutcome="completed" />
+      </extensionElements>
+      <conditionExpression xsi:type="tFormalExpression">${execution.getVariable('Task_0kj19wp_result') != null &amp;&amp; bproc_UserTaskResults.containsOutcome(execution.getVariable('Task_0kj19wp_result'), 'completed')}</conditionExpression>
+    </sequenceFlow>
+    <sequenceFlow id="SequenceFlow_1m8t273" name="Patient didn&#39;t come" sourceRef="ExclusiveGateway_0loj62c" targetRef="Task_132bd40">
+      <extensionElements>
+        <bproc:conditionDetails conditionSource="userTaskOutcome" conditionType="anyoneCompleted" userTaskId="Task_0kj19wp" userTaskOutcome="patientDidNotCome" />
+      </extensionElements>
+      <conditionExpression xsi:type="tFormalExpression">${execution.getVariable('Task_0kj19wp_result') != null &amp;&amp; bproc_UserTaskResults.containsOutcome(execution.getVariable('Task_0kj19wp_result'), 'patientDidNotCome')}</conditionExpression>
+    </sequenceFlow>
+    <exclusiveGateway id="ExclusiveGateway_0loj62c">
+      <incoming>SequenceFlow_1j3p89u</incoming>
+      <outgoing>SequenceFlow_1c2y47o</outgoing>
+      <outgoing>SequenceFlow_1m8t273</outgoing>
+    </exclusiveGateway>
+    <endEvent id="EndEvent_10bzcw0">
+      <incoming>SequenceFlow_1ys3jpk</incoming>
+    </endEvent>
+    <sequenceFlow id="SequenceFlow_1ys3jpk" sourceRef="Task_02cawfw" targetRef="EndEvent_10bzcw0" />
+    <serviceTask id="Task_0x4peh7" name="Set status &#34;Canceled&#34;" flowable:expression="${petclinic_VisitStatusService.setStatus(visit, &#39;Canceled&#39;)}" bproc:taskType="springBean">
+      <extensionElements>
+        <bproc:springBean beanName="petclinic_VisitStatusService" methodName="setStatus">
+          <bproc:methodParam name="visit" type="com.haulmont.sample.petclinic.entity.visit.Visit" isVariable="true">visit</bproc:methodParam>
+          <bproc:methodParam name="status" type="java.lang.String" isVariable="false">Canceled</bproc:methodParam>
+        </bproc:springBean>
+      </extensionElements>
+      <incoming>SequenceFlow_0kurbcp</incoming>
+      <outgoing>SequenceFlow_0qy9di0</outgoing>
+    </serviceTask>
+    <endEvent id="EndEvent_1cltzya">
+      <incoming>SequenceFlow_0qy9di0</incoming>
+    </endEvent>
+    <endEvent id="EndEvent_05x8g75">
+      <incoming>SequenceFlow_0w7cxpv</incoming>
+    </endEvent>
+    <sequenceFlow id="SequenceFlow_0w7cxpv" sourceRef="Task_132bd40" targetRef="EndEvent_05x8g75" />
+    <serviceTask id="Task_132bd40" name="Set status &#34;Patient did not come&#34;" flowable:expression="${petclinic_VisitStatusService.setStatus(visit, &#39;Patient did not come&#39;)}" bproc:taskType="springBean">
+      <extensionElements>
+        <bproc:springBean beanName="petclinic_VisitStatusService" methodName="setStatus">
+          <bproc:methodParam name="visit" type="com.haulmont.sample.petclinic.entity.visit.Visit" isVariable="true">visit</bproc:methodParam>
+          <bproc:methodParam name="status" type="java.lang.String" isVariable="false">Patient did not come</bproc:methodParam>
+        </bproc:springBean>
+      </extensionElements>
+      <incoming>SequenceFlow_1m8t273</incoming>
+      <incoming>SequenceFlow_0fd8yfd</incoming>
+      <outgoing>SequenceFlow_0w7cxpv</outgoing>
+    </serviceTask>
+    <boundaryEvent id="BoundaryEvent_1jw0251" name="1 day after the visit" attachedToRef="Task_0kj19wp">
+      <outgoing>SequenceFlow_0fd8yfd</outgoing>
+      <timerEventDefinition id="TimerEventDefinition_0wypsxb">
+        <timeDuration xsi:type="tFormalExpression">${overdueVisitDate}</timeDuration>
+      </timerEventDefinition>
+    </boundaryEvent>
+    <sequenceFlow id="SequenceFlow_0fd8yfd" name="Automatically cancel the visit" sourceRef="BoundaryEvent_1jw0251" targetRef="Task_132bd40">
+      <extensionElements>
+        <bproc:conditionDetails conditionSource="expression" />
+      </extensionElements>
+    </sequenceFlow>
+    <serviceTask id="Task_02cawfw" name="Save recommendations and send email to the owner" flowable:class="com.haulmont.sample.petclinic.process.delegate.CompleteVisitJavaDelegate" bproc:taskType="javaDelegateClass">
+      <extensionElements>
+        <flowable:field name="emailTemplateName">
+          <flowable:string>some-email-template</flowable:string>
+        </flowable:field>
+      </extensionElements>
+      <incoming>SequenceFlow_1c2y47o</incoming>
+      <outgoing>SequenceFlow_1ys3jpk</outgoing>
+    </serviceTask>
+  </process>
+  <bpmndi:BPMNDiagram id="BPMNDiagram_process">
+    <bpmndi:BPMNPlane id="BPMNPlane_process" bpmnElement="Collaboration_158pn0r">
+      <bpmndi:BPMNShape id="Participant_1a5mh67_di" bpmnElement="Participant_1a5mh67" isHorizontal="true">
+        <omgdc:Bounds x="65" y="74" width="972" height="671" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="BPMNShape_startEvent1" bpmnElement="startEvent1">
+        <omgdc:Bounds x="139" y="155" width="30" height="30" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0s9j6kn_di" bpmnElement="Lane_0s9j6kn" isHorizontal="true">
+        <omgdc:Bounds x="95" y="74" width="942" height="190" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_1fky1f0_di" bpmnElement="Lane_1fky1f0" isHorizontal="true">
+        <omgdc:Bounds x="95" y="264" width="942" height="180" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Lane_0xfmytg_di" bpmnElement="Lane_0xfmytg" isHorizontal="true">
+        <omgdc:Bounds x="95" y="444" width="942" height="301" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_144bj8o_di" bpmnElement="SequenceFlow_144bj8o">
+        <omgdi:waypoint x="169" y="170" />
+        <omgdi:waypoint x="222" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="IntermediateCatchEvent_05ti04y_di" bpmnElement="IntermediateThrowEvent_0tx81wt">
+        <omgdc:Bounds x="222" y="152" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="200" y="195" width="80" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_11leha8_di" bpmnElement="SequenceFlow_11leha8">
+        <omgdi:waypoint x="258" y="170" />
+        <omgdi:waypoint x="311" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="UserTask_19sjjab_di" bpmnElement="Task_1isi203">
+        <omgdc:Bounds x="311" y="130" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ExclusiveGateway_1ng3dkm_di" bpmnElement="ExclusiveGateway_1ng3dkm" isMarkerVisible="true">
+        <omgdc:Bounds x="464" y="145" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1c3hhdl_di" bpmnElement="SequenceFlow_1c3hhdl">
+        <omgdi:waypoint x="411" y="170" />
+        <omgdi:waypoint x="464" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0kurbcp_di" bpmnElement="SequenceFlow_0kurbcp">
+        <omgdi:waypoint x="514" y="170" />
+        <omgdi:waypoint x="598" y="170" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="533" y="152" width="47" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_0e4xc8e_di" bpmnElement="SequenceFlow_0e4xc8e">
+        <omgdi:waypoint x="489" y="195" />
+        <omgdi:waypoint x="489" y="311" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="497" y="230" width="51" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="UserTask_1s2rb46_di" bpmnElement="Task_1ue251k">
+        <omgdc:Bounds x="439" y="311" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_07w22vu_di" bpmnElement="SequenceFlow_07w22vu">
+        <omgdi:waypoint x="489" y="391" />
+        <omgdi:waypoint x="489" y="480" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="UserTask_0tgocke_di" bpmnElement="Task_0kj19wp">
+        <omgdc:Bounds x="439" y="480" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1aoi23o_di" bpmnElement="Task_0x4peh7">
+        <omgdc:Bounds x="598" y="130" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_1cltzya_di" bpmnElement="EndEvent_1cltzya">
+        <omgdc:Bounds x="761" y="152" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0qy9di0_di" bpmnElement="SequenceFlow_0qy9di0">
+        <omgdi:waypoint x="698" y="170" />
+        <omgdi:waypoint x="761" y="170" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ExclusiveGateway_0loj62c_di" bpmnElement="ExclusiveGateway_0loj62c" isMarkerVisible="true">
+        <omgdc:Bounds x="607" y="495" width="50" height="50" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1j3p89u_di" bpmnElement="SequenceFlow_1j3p89u">
+        <omgdi:waypoint x="539" y="520" />
+        <omgdi:waypoint x="607" y="520" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1c2y47o_di" bpmnElement="SequenceFlow_1c2y47o">
+        <omgdi:waypoint x="657" y="520" />
+        <omgdi:waypoint x="761" y="520" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="672" y="502" width="74" height="14" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="SequenceFlow_1m8t273_di" bpmnElement="SequenceFlow_1m8t273">
+        <omgdi:waypoint x="632" y="545" />
+        <omgdi:waypoint x="632" y="624" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="640" y="573" width="65" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="ServiceTask_0ld3yyi_di" bpmnElement="Task_132bd40">
+        <omgdc:Bounds x="582" y="624" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="ServiceTask_1gneljh_di" bpmnElement="Task_02cawfw">
+        <omgdc:Bounds x="761" y="480" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="EndEvent_10bzcw0_di" bpmnElement="EndEvent_10bzcw0">
+        <omgdc:Bounds x="901" y="502" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_1ys3jpk_di" bpmnElement="SequenceFlow_1ys3jpk">
+        <omgdi:waypoint x="861" y="520" />
+        <omgdi:waypoint x="901" y="520" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="EndEvent_05x8g75_di" bpmnElement="EndEvent_05x8g75">
+        <omgdc:Bounds x="901" y="646" width="36" height="36" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0w7cxpv_di" bpmnElement="SequenceFlow_0w7cxpv">
+        <omgdi:waypoint x="682" y="664" />
+        <omgdi:waypoint x="901" y="664" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNShape id="BoundaryEvent_0f2uxzr_di" bpmnElement="BoundaryEvent_1jw0251">
+        <omgdc:Bounds x="473" y="542" width="36" height="36" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="402" y="566" width="71" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNEdge id="SequenceFlow_0fd8yfd_di" bpmnElement="SequenceFlow_0fd8yfd">
+        <omgdi:waypoint x="491" y="578" />
+        <omgdi:waypoint x="491" y="664" />
+        <omgdi:waypoint x="582" y="664" />
+        <bpmndi:BPMNLabel>
+          <omgdc:Bounds x="406" y="641" width="74" height="27" />
+        </bpmndi:BPMNLabel>
+      </bpmndi:BPMNEdge>
+    </bpmndi:BPMNPlane>
+  </bpmndi:BPMNDiagram>
+</definitions>

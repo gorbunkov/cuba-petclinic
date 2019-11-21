@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://caption"
+        messagesPack="com.haulmont.sample.petclinic.web.processform.visit">
+    <layout spacing="true">
+        <form>
+            <pickerField id="visit" metaClass="petclinic_Visit" caption="msg://visit" editable="false">
+                <actions>
+                    <action id="open" type="picker_open"/>
+                </actions>
+            </pickerField>
+            <textArea id="ownersComment" caption="msg://ownersComment" editable="false"/>
+            <textArea id="recommendations" caption="msg://recommendations"/>
+        </form>
+        <hbox id="outcomesPanel" spacing="true">
+            <button id="visitCompletedBtn" caption="msg://visitCompleted" icon="THUMBS_UP"/>
+            <button id="patientDidNotComeBtn" caption="msg://patientDidNotCome" icon="THUMBS_DOWN"/>
+        </hbox>
+
+    </layout>
+</window>

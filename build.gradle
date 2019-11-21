@@ -5,6 +5,14 @@ buildscript {
         maven {
             url 'https://dl.bintray.com/cuba-platform/main'
         }
+
+        maven {
+            url 'https://cuba-platform.bintray.com/premium'
+            credentials {
+                username(rootProject.hasProperty('bintrayPremiumRepoUser') ? rootProject['bintrayPremiumRepoUser'] : System.getenv('CUBA_PREMIUM_USER'))
+                password(rootProject.hasProperty('premiumRepoPass') ? rootProject['premiumRepoPass'] : System.getenv('CUBA_PREMIUM_PASSWORD'))
+            }
+        }
         jcenter()
     }
     dependencies {
@@ -39,6 +47,7 @@ cuba {
 
 dependencies {
     appComponent("com.haulmont.cuba:cuba-global:$cubaVersion")
+    appComponent('com.haulmont.addon.bproc:bproc-global:1.0.0')
 
 }
 

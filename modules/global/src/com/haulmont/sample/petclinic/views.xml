@@ -26,4 +26,9 @@
         <property name="owner"
                   view="_local"/>
     </view>
+    <view entity="petclinic_Visit" name="visit-full" extends="_local">
+        <property name="pet" view="_minimal">
+            <property name="owner" view="_local"/>
+        </property>
+    </view>
 </views>

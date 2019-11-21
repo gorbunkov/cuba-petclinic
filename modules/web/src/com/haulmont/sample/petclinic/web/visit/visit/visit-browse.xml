@@ -36,6 +36,7 @@
                 <column id="visitDate"/>
                 <column id="description"/>
                 <column id="pet"/>
+                <column id="status"/>
             </columns>
             <rowsCount/>
             <buttonsPanel id="buttonsPanel"

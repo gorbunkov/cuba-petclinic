@@ -28,6 +28,8 @@
                 <dateField property="visitDate"/>
                 <textArea rows="5" property="description"/>
                 <lookupPickerField property="pet" optionsContainer="petsDc"/>
+                <textField property="status" editable="false"/>
+                <textArea rows="5" property="recommendations" editable="false"/>
             </column>
         </form>
 
