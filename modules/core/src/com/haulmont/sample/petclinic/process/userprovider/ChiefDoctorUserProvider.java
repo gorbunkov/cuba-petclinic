@@ -11,6 +11,8 @@ import java.util.List;
 @Component("petclinic_ChiefDoctorUserProvider")
 public class ChiefDoctorUserProvider implements UserProvider {
 
+    private static final String CHIEF_DOCTOR_ROLE_NAME = "Chief doctor";
+
     @Inject
     private DataManager dataManager;
 
@@ -18,7 +20,7 @@ public class ChiefDoctorUserProvider implements UserProvider {
     public User get(String executionId) {
         List<User> chiefDoctors = dataManager.load(User.class)
                 .query("select u from sec$User u join u.userRoles ur where ur.role.name = :roleName")
-                .parameter("roleName", "Chief doctor")
+                .parameter("roleName", CHIEF_DOCTOR_ROLE_NAME)
                 .list();
         if (chiefDoctors.isEmpty()) {
             throw new RuntimeException("No chief doctor found");
